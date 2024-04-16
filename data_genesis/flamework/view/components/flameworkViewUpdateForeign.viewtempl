@@ -1,0 +1,9 @@
+<div class="form-floating mb-3">
+    <select class="form-select" id="[fieldNameMin]Select" th:field="*{[fieldNameMin]}" >
+        <option value="" th:unless="${[foreignNameMin]}">Select one</option>
+        <th:block th:each="f : ${[foreignNameMin]}">
+            <option th:value="${f.[foreignPrimaryNameMaj]}" th:text="${f.label}" th:selected="${f.[foreignPrimaryNameMaj]} == *{[fieldNameMin]?.[foreignPrimaryNameMaj]}"></option>
+        </th:block>
+    </select>
+    <label for="[fieldNameMin]Select">[foreignNameFormattedMaj]</label>
+</div>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Ajoutez les liens vers les bibliothèques CSS et JS nécessaires pour votre projet -->
+</head>
+<body>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-6 offset-3">
+                <div class="bg-secondary rounded h-100 p-4">
+                    <h6 class="mb-4">Liste de facture</h6>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Id</th><th scope="col">Daty</th><th scope="col">Designation</th><th scope="col">Etat</th><th scope="col">Montanttotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="facture : ${liste}">
+                                <td th:text="${facture.id}"></td><td th:text="${facture.daty}"></td><td th:text="${facture.designation}"></td><td th:text="${facture.etat}"></td><td th:text="${facture.montanttotal}"></td>
+                                <td>
+                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" th:data-bs-target="'#modifiermodal' + ${facture.Id}">
+                                        <p><i class="bi bi-pencil"></i>Modifier</p>
+                                    </button>
+                                    <div class="modal fade" th:id="'modifiermodal' + ${facture.Id}" tabindex="-1" th:aria-labelledby="'modifiermodalLabel' + ${facture.Id}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form th:action="@{'/Facturation/updatefacture.do'}" method="put">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" th:text="'Modifier un ' + ${facture}">Modifier un facture</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" th:name="id" th:value="${facture.Id}">
+                                                        <div class="mb-3"> 
+    <label for="datyinput" class="form-label">Daty
+    </label> 
+    <input type="date" class="form-control" id="datyinput" aria-describedby="datyhelp" name="daty" th:value="${facture.daty}"> 
+</div>
+<div class="mb-3"> 
+    <label for="designationinput" class="form-label">Designation
+    </label> 
+    <input type="text" class="form-control" id="designationinput" aria-describedby="designationhelp" name="designation" th:value="${ facture.designation }"> 
+</div>
+<div class="mb-3"> 
+    <label for="etatinput" class="form-label">Etat
+    </label> 
+    <input type="text" class="form-control" id="etatinput" aria-describedby="etathelp" name="etat" th:value="${ facture.etat }"> 
+</div>
+<div class="mb-3"> 
+    <label for="montanttotalinput" class="form-label">Montanttotal
+    </label> 
+    <input type="text" class="form-control" id="montanttotalinput" aria-describedby="montanttotalhelp" name="montanttotal" th:value="${ facture.montanttotal}"> 
+</div>
+
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary">Valider</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <form th:action="@{'/Facturation/deletefacture.do'}" method="delete">
+                                        <input type="hidden" th:name="id" th:value="${facture.getId}">
+                                        <button type="submit" class="btn btn-danger">
+                                            <p><i class="bi bi-trash"></i>Supprimer</p>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutmodal">
+                        <p><i class="bi bi-plus"></i>Ajouter</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Ajout -->
+            <div class="modal fade" id="ajoutmodal" tabindex="-1" aria-labelledby="ajoutmodalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form th:action="@{'/Facturation/insertfacture.do'}" method="post">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" th:text="'Ajouter un ' + ${facture}">Ajouter un facture</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3"> 
+    <label for="datyinput" class="form-label">Daty
+    </label> 
+    <input type="date" class="form-control" id="datyinput" aria-describedby="datyhelp" name="daty"> 
+</div>
+<div class="mb-3"> 
+    <label for="designationinput" class="form-label">Designation
+    </label> 
+    <input type="text" class="form-control" id="designationinput" aria-describedby="designationhelp" name="designation"> 
+</div>
+<div class="mb-3"> 
+    <label for="etatinput" class="form-label">Etat
+    </label> 
+    <input type="text" class="form-control" id="etatinput" aria-describedby="etathelp" name="etat"> 
+</div>
+<div class="mb-3"> 
+    <label for="montanttotalinput" class="form-label">Montanttotal
+    </label> 
+    <input type="text" class="form-control" id="montanttotalinput" aria-describedby="montanttotalhelp" name="montanttotal"> 
+</div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Valider</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

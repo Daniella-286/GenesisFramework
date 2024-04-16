@@ -1,0 +1,29 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    
+<head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" media="all" 
+     href="web/assets/styles/style.css" th:href="@{web/assets/styles/style.css}"/>
+
+</head>
+<body>
+    <h1 th:text="${recipient}">Default Title</h1>
+    <h2>Personne:</h2>
+    
+    <h3 th:text="${userage}">Sous titre2</h3>
+    <p>The year is <span th:text="2013">1492</span>.</p>
+    <p th:text="${recipient}">Default Message</p>
+    
+    <h2>Formulaire POST</h2>
+    <form action="traitementCategorie.htm" method="post">
+        <label for="name">Id:</label>
+        <input type="text" id="name" name="id_categorie_lieu"  required><br><br>
+        <label for="email">Nom:</label>
+        <input type="text" id="email" name="nom_categorie_lieu" th:field="*{nom_categorie_lieu}" required><br><br>
+        <input type="submit" value="Envoyer">
+    </form>
+</body>
+</html>

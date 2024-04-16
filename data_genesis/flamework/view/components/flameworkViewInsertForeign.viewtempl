@@ -1,0 +1,7 @@
+<div class="form-floating mb-3"> 
+    <label  th:text="[fieldNameMin]"></label> 
+    <select class="form-select" id="[fieldNameMin]Select" name="[fieldNameMin]">
+        <option th:each="[foreignType] : ${[foreignNameMin]}" th:value="${[foreignType].[foreignPrimaryNameMaj]}" th:text="${[foreignType].label}"></option>
+    </select> 
+</div>
+

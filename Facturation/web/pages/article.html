@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Ajoutez les liens vers les bibliothèques CSS et JS nécessaires pour votre projet -->
+</head>
+<body>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-6 offset-3">
+                <div class="bg-secondary rounded h-100 p-4">
+                    <h6 class="mb-4">Liste de article</h6>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Id</th><th scope="col">Code</th><th scope="col">Designation</th><th scope="col">Unite article</th><th scope="col">Type article</th><th scope="col">Pu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="article : ${liste}">
+                                <td th:text="${article.id}"></td><td th:text="${article.code}"></td><td th:text="${article.designation}"></td><td th:text="${article.uniteArticle.id}"></td><td th:text="${article.typeArticle.id}"></td><td th:text="${article.pu}"></td>
+                                <td>
+                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" th:data-bs-target="'#modifiermodal' + ${article.Id}">
+                                        <p><i class="bi bi-pencil"></i>Modifier</p>
+                                    </button>
+                                    <div class="modal fade" th:id="'modifiermodal' + ${article.Id}" tabindex="-1" th:aria-labelledby="'modifiermodalLabel' + ${article.Id}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form th:action="@{'/Facturation/updatearticle.do'}" method="put">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" th:text="'Modifier un ' + ${article}">Modifier un article</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" th:name="id" th:value="${article.Id}">
+                                                        <div class="mb-3"> 
+    <label for="codeinput" class="form-label">Code
+    </label> 
+    <input type="text" class="form-control" id="codeinput" aria-describedby="codehelp" name="code" th:value="${ article.code }"> 
+</div>
+<div class="mb-3"> 
+    <label for="designationinput" class="form-label">Designation
+    </label> 
+    <input type="text" class="form-control" id="designationinput" aria-describedby="designationhelp" name="designation" th:value="${ article.designation }"> 
+</div>
+<div class="form-floating mb-3">
+    <select class="form-select" id="uniteArticleSelect" th:field="*{uniteArticle}" >
+        <option value="" th:unless="${uniteArticle}">Select one</option>
+        <th:block th:each="f : ${uniteArticle}">
+            <option th:value="${f.Id}" th:text="${f.label}" th:selected="${f.Id} == *{uniteArticle?.Id}"></option>
+        </th:block>
+    </select>
+    <label for="uniteArticleSelect">Unite article</label>
+</div>
+<div class="form-floating mb-3">
+    <select class="form-select" id="typeArticleSelect" th:field="*{typeArticle}" >
+        <option value="" th:unless="${typeArticle}">Select one</option>
+        <th:block th:each="f : ${typeArticle}">
+            <option th:value="${f.Id}" th:text="${f.label}" th:selected="${f.Id} == *{typeArticle?.Id}"></option>
+        </th:block>
+    </select>
+    <label for="typeArticleSelect">Type article</label>
+</div>
+<div class="mb-3"> 
+    <label for="puinput" class="form-label">Pu
+    </label> 
+    <input type="text" class="form-control" id="puinput" aria-describedby="puhelp" name="pu" th:value="${ article.pu}"> 
+</div>
+
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary">Valider</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <form th:action="@{'/Facturation/deletearticle.do'}" method="delete">
+                                        <input type="hidden" th:name="id" th:value="${article.getId}">
+                                        <button type="submit" class="btn btn-danger">
+                                            <p><i class="bi bi-trash"></i>Supprimer</p>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutmodal">
+                        <p><i class="bi bi-plus"></i>Ajouter</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Ajout -->
+            <div class="modal fade" id="ajoutmodal" tabindex="-1" aria-labelledby="ajoutmodalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form th:action="@{'/Facturation/insertarticle.do'}" method="post">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" th:text="'Ajouter un ' + ${article}">Ajouter un article</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3"> 
+    <label for="codeinput" class="form-label">Code
+    </label> 
+    <input type="text" class="form-control" id="codeinput" aria-describedby="codehelp" name="code"> 
+</div>
+<div class="mb-3"> 
+    <label for="designationinput" class="form-label">Designation
+    </label> 
+    <input type="text" class="form-control" id="designationinput" aria-describedby="designationhelp" name="designation"> 
+</div>
+<div class="form-floating mb-3"> 
+    <label  th:text="uniteArticle"></label> 
+    <select class="form-select" id="uniteArticleSelect" name="uniteArticle">
+        <option th:each="UniteArticle : ${uniteArticle}" th:value="${UniteArticle.Id}" th:text="${UniteArticle.label}"></option>
+    </select> 
+</div>
+
+<div class="form-floating mb-3"> 
+    <label  th:text="typeArticle"></label> 
+    <select class="form-select" id="typeArticleSelect" name="typeArticle">
+        <option th:each="TypeArticle : ${typeArticle}" th:value="${TypeArticle.Id}" th:text="${TypeArticle.label}"></option>
+    </select> 
+</div>
+
+<div class="mb-3"> 
+    <label for="puinput" class="form-label">Pu
+    </label> 
+    <input type="text" class="form-control" id="puinput" aria-describedby="puhelp" name="pu"> 
+</div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Valider</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
