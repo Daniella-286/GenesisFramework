@@ -82,3 +82,381 @@
 
 
 
+public String generateController(Entity entity, Database database, Credentials credentials, String projectName)
+            throws IOException, Exception {
+        String content = HandyManUtils.getFileContent(Constantes.DATA_PATH + "/"
+                + getController().getControllerTemplate() + "." + Constantes.CONTROLLER_TEMPLATE_EXT);
+        content = content.replace("[namespace]", getSyntax().get("namespace"));
+        content = content.replace("[namespaceStart]", getSyntax().get("namespaceStart"));
+        content = content.replace("[namespaceEnd]", getSyntax().get("namespaceEnd"));
+        content = content.replace("[package]", getController().getControllerPackage());
+        String imports = "";
+        for (String i : getController().getControllerImports()) {
+            imports += i + "\n";
+        }
+        content = content.replace("[imports]", imports);
+        String annotes = "";
+        for (String a : getController().getControllerAnnotations()) {
+            annotes += a + "\n";
+        }
+        content = content.replace("[controllerAnnotations]", annotes);
+        content = content.replace("[extends]", getController().getControllerExtends());
+        String fields = "", fieldAnnotes;
+        for (ControllerField cf : getController().getControllerFields()) {
+            fieldAnnotes = "";
+            for (String a : cf.getControllerFieldAnnotations()) {
+                fieldAnnotes += a + "\n";
+            }
+            fields += fieldAnnotes;
+            fields += cf.getControllerFieldContent() + "\n";
+        }
+        for (EntityField ef : entity.getFields()) {
+            if (ef.isForeign() && getController().getControllerFieldsForeign() != null) {
+                fieldAnnotes = "";
+                for (String a : getController().getControllerFieldsForeign().getControllerFieldAnnotations()) {
+                    fieldAnnotes += a + "\n";
+                }
+                fields += fieldAnnotes;
+                fields += getController().getControllerFieldsForeign().getControllerFieldContent() + "\n";
+                fields = fields.replace("[foreignNameMaj]", HandyManUtils.majStart(ef.getType()));
+                fields = fields.replace("[foreignNameMin]", HandyManUtils.minStart(ef.getType()));
+            }
+        }
+
+        content = content.replace("[fields]", fields);
+        String constructors = "";
+        String constructorParameter, foreignInstanciation;
+        for (String c : getController().getControllerConstructors()) {
+            constructorParameter = "";
+            foreignInstanciation = "";
+            for (EntityField ef : entity.getFields()) {
+                if (ef.isForeign()) {
+                    constructorParameter = constructorParameter + ","
+                            + getController().getControllerForeignContextParam();
+                    constructorParameter = constructorParameter.replace("[foreignNameMaj]",
+                            HandyManUtils.majStart(ef.getName()));
+                    foreignInstanciation += getController().getControllerForeignContextInstanciation();
+                    foreignInstanciation = foreignInstanciation.replace("[foreignNameMaj]",
+                            HandyManUtils.majStart(ef.getName())) + "\n";
+                }
+            }
+            constructors += c + "\n";
+            constructors = constructors.replace("[controllerForeignContextParam]", constructorParameter);
+            constructors = constructors.replace("[controllerForeignContextInstanciation]", foreignInstanciation);
+        }
+        content = content.replace("[constructors]", constructors);
+        String methods = "", methodAnnotes, methodParameters;
+        String changeInstanciation, whereInstanciation, foreignList, foreignInclude;
+        for (ControllerMethod m : getController().getControllerMethods()) {
+            methodAnnotes = "";
+            for (String ma : m.getControllerMethodAnnotations()) {
+                methodAnnotes += ma + "\n";
+            }
+            methods += methodAnnotes;
+            methodParameters = "";
+            for (EntityField ef : entity.getFields()) {
+                methodParameters += m.getControllerMethodParameter();
+                if (methodParameters.isEmpty() == false) {
+                    methodParameters += ",";
+                }
+                methodParameters = methodParameters.replace("[fieldType]", ef.getType());
+                methodParameters = methodParameters.replace("[fieldNameMin]", HandyManUtils.minStart(ef.getName()));
+            }
+            if (methodParameters.isEmpty() == false) {
+                methodParameters = methodParameters.substring(0, methodParameters.length() - 1);
+            }
+            methods += HandyManUtils.getFileContent(Constantes.DATA_PATH + "/" + m.getControllerMethodContent() + "."
+                    + Constantes.CONTROLLER_TEMPLATE_EXT);
+            methods = methods.replace("[controllerMethodParameter]", methodParameters);
+            changeInstanciation = "";
+            foreignList = "";
+            foreignInclude = "";
+            for (int i = 0; i < entity.getFields().length; i++) {
+                if (entity.getFields()[i].isPrimary()) {
+                    continue;
+                } else if (entity.getFields()[i].isForeign()) {
+                    changeInstanciation += getController().getControllerForeignInstanciation().get("template");
+                    changeInstanciation = changeInstanciation.replace("[content]", getTypeParsers()
+                            .get(getTypes().get(database.getTypes().get(entity.getColumns()[i].getType()))));
+                    changeInstanciation = changeInstanciation.replace("[value]",
+                            getController().getControllerForeignInstanciation().get("value"));
+                    changeInstanciation = changeInstanciation.replace("[fieldNameMin]",
+                            HandyManUtils.minStart(entity.getFields()[i].getName()));
+                    changeInstanciation = changeInstanciation.replace("[fieldNameMaj]",
+                            HandyManUtils.majStart(entity.getFields()[i].getName()));
+                    changeInstanciation = changeInstanciation.replace("[foreignType]", entity.getFields()[i].getType());
+                    changeInstanciation = changeInstanciation.replace("[referencedFieldNameMaj]",
+                            HandyManUtils.majStart(entity.getFields()[i].getReferencedField()));
+                    changeInstanciation = changeInstanciation.replace("[foreignNameMin]",
+                            HandyManUtils.minStart(entity.getFields()[i].getName()));
+                    foreignList += getController().getControllerForeignList();
+                    foreignList = foreignList.replace("[foreignType]", entity.getFields()[i].getType());
+                    foreignList = foreignList.replace("[foreignNameMin]",
+                            HandyManUtils.minStart(entity.getFields()[i].getName()));
+                    foreignInclude += getController().getControllerForeignInclude();
+                    foreignInclude = foreignInclude.replace("[foreignNameMaj]",
+                            HandyManUtils.majStart(entity.getFields()[i].getName()));
+                    continue;
+                }
+                changeInstanciation += getController().getControllerChangeInstanciation().get("template");
+                changeInstanciation = changeInstanciation.replace("[content]",
+                        getTypeParsers().get(entity.getFields()[i].getType()));
+                changeInstanciation = changeInstanciation.replace("[value]",
+                        getController().getControllerChangeInstanciation().get("value"));
+                changeInstanciation = changeInstanciation.replace("[fieldNameMin]",
+                        HandyManUtils.minStart(entity.getFields()[i].getName()));
+                changeInstanciation = changeInstanciation.replace("[fieldNameMaj]",
+                        HandyManUtils.majStart(entity.getFields()[i].getName()));
+            }
+            whereInstanciation = "";
+            whereInstanciation += getController().getControllerWhereInstanciation().get("template");
+            whereInstanciation = whereInstanciation.replace("[content]",
+                    getTypeParsers().get(entity.getPrimaryField().getType()));
+            whereInstanciation = whereInstanciation.replace("[value]",
+                    getController().getControllerWhereInstanciation().get("value"));
+            methods = methods.replace("[primaryParse]",
+                    getTypeParsers().get(entity.getPrimaryField().getType()).replace("[value]", "[primaryNameMin]"));
+            methods = methods.replace("[controllerChangeInstanciation]", changeInstanciation);
+            methods = methods.replace("[controllerWhereInstanciation]", whereInstanciation);
+            methods = methods.replace("[controllerForeignList]", foreignList);
+            methods = methods.replace("[controllerForeignInclude]", foreignInclude);
+            methods = methods.replace("[classNameMin]", HandyManUtils.minStart(entity.getClassName()));
+            methods = methods.replace("[classNameMaj]", HandyManUtils.majStart(entity.getClassName()));
+            methods = methods.replace("[primaryNameMaj]", HandyManUtils.majStart(entity.getPrimaryField().getName()));
+            methods = methods.replace("[primaryType]", entity.getPrimaryField().getType());
+            methods = methods.replace("[primaryNameMin]", HandyManUtils.minStart(entity.getPrimaryField().getName()));
+            methods = methods.replace("[databaseDriver]", database.getDriver());
+            methods = methods.replace("[databaseSgbd]", database.getNom());
+            methods = methods.replace("[databaseHost]", credentials.getHost());
+            methods = methods.replace("[databasePort]", database.getPort());
+            methods = methods.replace("[databaseName]", credentials.getDatabaseName());
+            methods = methods.replace("[user]", credentials.getUser());
+            methods = methods.replace("[pwd]", credentials.getPwd());
+            methods = methods.replace("[databaseUseSSL]", String.valueOf(credentials.isUseSSL()));
+            methods = methods.replace("[databaseAllowKey]", String.valueOf(credentials.isAllowPublicKeyRetrieval()));
+        }
+        content = content.replace("[methods]", methods);
+        content = content.replace("[controllerNameMaj]", getController().getControllerName());
+        content = content.replace("[classNameMaj]", HandyManUtils.majStart(entity.getClassName()));
+        content = content.replace("[classNameMin]", HandyManUtils.minStart(entity.getClassName()));
+
+        content = content.replace("[fieldNameMin]", HandyManUtils.minStart(entity.getTableName()));
+
+        content = content.replace("[projectNameMin]", HandyManUtils.minStart(projectName));
+        content = content.replace("[projectNameMaj]", HandyManUtils.majStart(projectName));
+        content = content.replace("[databaseDriver]", database.getDriver());
+        content = content.replace("[databaseSgbd]", database.getNom());
+        content = content.replace("[databaseHost]", credentials.getHost());
+        content = content.replace("[databaseName]", credentials.getDatabaseName());
+        content = content.replace("[databasePort]", database.getPort());
+        content = content.replace("[databaseID]", String.valueOf(database.getId()));
+        content = content.replace("[user]", credentials.getUser());
+        content = content.replace("[pwd]", credentials.getPwd());
+        content = content.replace("[databaseUseSSL]", String.valueOf(credentials.isUseSSL()));
+        content = content.replace("[databaseAllowKey]", String.valueOf(credentials.isAllowPublicKeyRetrieval()));
+        return content;
+    }
+
+
+
+
+    "modelConstructors":[
+                "public [classNameMaj](){}",
+                "public [classNameMaj]([primaryFieldType] o){ [primaryFieldName[modelFieldCase]]=o; }"
+            ],
+
+
+
+
+    "controllerChangeInstanciation":{
+                "template":"o.set[fieldNameMaj]([fieldNameMin]);",
+                "value":"entity.getData().get(\"[fieldNameMin]\")"
+            },
+            "controllerWhereInstanciation":{
+                "template":"where.set[primaryNameMaj]([content]);",
+                "value":"entity.getData().get(\"[primaryNameMin]\")"
+            },
+            "controllerForeignInstanciation":{
+                "template":"o.set[fieldNameMaj](new [projectNameMin].entities.[foreignType]([content]));",
+                "value":"entity.getData().get(\"[fieldNameMin]\")"
+            },
+
+
+
+
+
+public String generateController(Entity entity, Database database, Credentials credentials, String projectName)
+            throws IOException, Exception {
+        String content = HandyManUtils.getFileContent(Constantes.DATA_PATH + "/"
+                + getController().getControllerTemplate() + "." + Constantes.CONTROLLER_TEMPLATE_EXT);
+        content = content.replace("[namespace]", getSyntax().get("namespace"));
+        content = content.replace("[namespaceStart]", getSyntax().get("namespaceStart"));
+        content = content.replace("[namespaceEnd]", getSyntax().get("namespaceEnd"));
+        content = content.replace("[package]", getController().getControllerPackage());
+        String imports = "";
+        for (String i : getController().getControllerImports()) {
+            imports += i + "\n";
+        }
+        content = content.replace("[imports]", imports);
+        String annotes = "";
+        for (String a : getController().getControllerAnnotations()) {
+            annotes += a + "\n";
+        }
+        content = content.replace("[controllerAnnotations]", annotes);
+        content = content.replace("[extends]", getController().getControllerExtends());
+        String fields = "", fieldAnnotes;
+        for (ControllerField cf : getController().getControllerFields()) {
+            fieldAnnotes = "";
+            for (String a : cf.getControllerFieldAnnotations()) {
+                fieldAnnotes += a + "\n";
+            }
+            fields += fieldAnnotes;
+            fields += cf.getControllerFieldContent() + "\n";
+        }
+        for (EntityField ef : entity.getFields()) {
+            if (ef.isForeign() && getController().getControllerFieldsForeign() != null) {
+                fieldAnnotes = "";
+                for (String a : getController().getControllerFieldsForeign().getControllerFieldAnnotations()) {
+                    fieldAnnotes += a + "\n";
+                }
+                fields += fieldAnnotes;
+                fields += getController().getControllerFieldsForeign().getControllerFieldContent() + "\n";
+                fields = fields.replace("[foreignNameMaj]", HandyManUtils.majStart(ef.getType()));
+                fields = fields.replace("[foreignNameMin]", HandyManUtils.minStart(ef.getType()));
+            }
+        }
+
+        content = content.replace("[fields]", fields);
+        String constructors = "";
+        String constructorParameter, foreignInstanciation;
+        for (String c : getController().getControllerConstructors()) {
+            constructorParameter = "";
+            foreignInstanciation = "";
+            for (EntityField ef : entity.getFields()) {
+                if (ef.isForeign()) {
+                    constructorParameter = constructorParameter + ","
+                            + getController().getControllerForeignContextParam();
+                    constructorParameter = constructorParameter.replace("[foreignNameMaj]",
+                            HandyManUtils.majStart(ef.getName()));
+                    foreignInstanciation += getController().getControllerForeignContextInstanciation();
+                    foreignInstanciation = foreignInstanciation.replace("[foreignNameMaj]",
+                            HandyManUtils.majStart(ef.getName())) + "\n";
+                }
+            }
+            constructors += c + "\n";
+            constructors = constructors.replace("[controllerForeignContextParam]", constructorParameter);
+            constructors = constructors.replace("[controllerForeignContextInstanciation]", foreignInstanciation);
+        }
+        content = content.replace("[constructors]", constructors);
+        String methods = "", methodAnnotes, methodParameters;
+        String changeInstanciation, whereInstanciation, foreignList, foreignInclude;
+        for (ControllerMethod m : getController().getControllerMethods()) {
+            methodAnnotes = "";
+            for (String ma : m.getControllerMethodAnnotations()) {
+                methodAnnotes += ma + "\n";
+            }
+            methods += methodAnnotes;
+            
+            methodParameters = "";
+            for (EntityField ef : entity.getFields()) {
+                methodParameters += m.getControllerMethodParameter();
+                if (methodParameters.isEmpty() == false) {
+                    methodParameters += ",";
+                }
+                methodParameters = methodParameters.replace("[fieldType]", ef.getType());
+                methodParameters = methodParameters.replace("[fieldNameMin]", HandyManUtils.minStart(ef.getName()));
+            }
+            if (methodParameters.isEmpty() == false) {
+                methodParameters = methodParameters.substring(0, methodParameters.length() - 1);
+            }
+            methods += HandyManUtils.getFileContent(Constantes.DATA_PATH + "/" + m.getControllerMethodContent() + "."
+                    + Constantes.CONTROLLER_TEMPLATE_EXT);
+            methods = methods.replace("[controllerMethodParameter]", methodParameters);
+            changeInstanciation = "";
+            foreignList = "";
+            foreignInclude = "";
+            for (int i = 0; i < entity.getFields().length; i++) {
+                if (entity.getFields()[i].isPrimary()) {
+                    continue;
+                } else if (entity.getFields()[i].isForeign()) {
+                    changeInstanciation += getController().getControllerForeignInstanciation().get("template");
+                    changeInstanciation = changeInstanciation.replace("[content]", getTypeParsers()
+                            .get(getTypes().get(database.getTypes().get(entity.getColumns()[i].getType()))));
+                    changeInstanciation = changeInstanciation.replace("[value]",
+                            getController().getControllerForeignInstanciation().get("value"));
+                    changeInstanciation = changeInstanciation.replace("[fieldNameMin]",
+                            HandyManUtils.minStart(entity.getFields()[i].getName()));
+                    changeInstanciation = changeInstanciation.replace("[fieldNameMaj]",
+                            HandyManUtils.majStart(entity.getFields()[i].getName()));
+                    changeInstanciation = changeInstanciation.replace("[foreignType]", entity.getFields()[i].getType());
+                    changeInstanciation = changeInstanciation.replace("[referencedFieldNameMaj]",
+                            HandyManUtils.majStart(entity.getFields()[i].getReferencedField()));
+                    changeInstanciation = changeInstanciation.replace("[foreignNameMin]",
+                            HandyManUtils.minStart(entity.getFields()[i].getName()));
+                    foreignList += getController().getControllerForeignList();
+                    foreignList = foreignList.replace("[foreignType]", entity.getFields()[i].getType());
+                    foreignList = foreignList.replace("[foreignNameMin]",
+                            HandyManUtils.minStart(entity.getFields()[i].getName()));
+                    foreignInclude += getController().getControllerForeignInclude();
+                    foreignInclude = foreignInclude.replace("[foreignNameMaj]",
+                            HandyManUtils.majStart(entity.getFields()[i].getName()));
+                    continue;
+                }
+                changeInstanciation += getController().getControllerChangeInstanciation().get("template");
+                changeInstanciation = changeInstanciation.replace("[content]",
+                        getTypeParsers().get(entity.getFields()[i].getType()));
+                changeInstanciation = changeInstanciation.replace("[value]",
+                        getController().getControllerChangeInstanciation().get("value"));
+                changeInstanciation = changeInstanciation.replace("[fieldNameMin]",
+                        HandyManUtils.minStart(entity.getFields()[i].getName()));
+                changeInstanciation = changeInstanciation.replace("[fieldNameMaj]",
+                        HandyManUtils.majStart(entity.getFields()[i].getName()));
+            }
+            whereInstanciation = "";
+            whereInstanciation += getController().getControllerWhereInstanciation().get("template");
+            whereInstanciation = whereInstanciation.replace("[content]",
+                    getTypeParsers().get(entity.getPrimaryField().getType()));
+            whereInstanciation = whereInstanciation.replace("[value]",
+                    getController().getControllerWhereInstanciation().get("value"));
+            methods = methods.replace("[primaryParse]",
+                    getTypeParsers().get(entity.getPrimaryField().getType()).replace("[value]", "[primaryNameMin]"));
+            methods = methods.replace("[controllerChangeInstanciation]", changeInstanciation);
+            methods = methods.replace("[controllerWhereInstanciation]", whereInstanciation);
+            methods = methods.replace("[controllerForeignList]", foreignList);
+            methods = methods.replace("[controllerForeignInclude]", foreignInclude);
+            methods = methods.replace("[classNameMin]", HandyManUtils.minStart(entity.getClassName()));
+            methods = methods.replace("[classNameMaj]", HandyManUtils.majStart(entity.getClassName()));
+            methods = methods.replace("[primaryNameMaj]", HandyManUtils.majStart(entity.getPrimaryField().getName()));
+            methods = methods.replace("[primaryType]", entity.getPrimaryField().getType());
+            methods = methods.replace("[primaryNameMin]", HandyManUtils.minStart(entity.getPrimaryField().getName()));
+            methods = methods.replace("[databaseDriver]", database.getDriver());
+            methods = methods.replace("[databaseSgbd]", database.getNom());
+            methods = methods.replace("[databaseHost]", credentials.getHost());
+            methods = methods.replace("[databasePort]", database.getPort());
+            methods = methods.replace("[databaseName]", credentials.getDatabaseName());
+            methods = methods.replace("[user]", credentials.getUser());
+            methods = methods.replace("[pwd]", credentials.getPwd());
+            methods = methods.replace("[databaseUseSSL]", String.valueOf(credentials.isUseSSL()));
+            methods = methods.replace("[databaseAllowKey]", String.valueOf(credentials.isAllowPublicKeyRetrieval()));
+        }
+        content = content.replace("[methods]", methods);
+        content = content.replace("[controllerNameMaj]", getController().getControllerName());
+        content = content.replace("[classNameMaj]", HandyManUtils.majStart(entity.getClassName()));
+        content = content.replace("[classNameMin]", HandyManUtils.minStart(entity.getClassName()));
+
+        content = content.replace("[fieldNameMin]", HandyManUtils.minStart(entity.getTableName()));
+
+        content = content.replace("[projectNameMin]", HandyManUtils.minStart(projectName));
+        content = content.replace("[projectNameMaj]", HandyManUtils.majStart(projectName));
+        content = content.replace("[databaseDriver]", database.getDriver());
+        content = content.replace("[databaseSgbd]", database.getNom());
+        content = content.replace("[databaseHost]", credentials.getHost());
+        content = content.replace("[databaseName]", credentials.getDatabaseName());
+        content = content.replace("[databasePort]", database.getPort());
+        content = content.replace("[databaseID]", String.valueOf(database.getId()));
+        content = content.replace("[user]", credentials.getUser());
+        content = content.replace("[pwd]", credentials.getPwd());
+        content = content.replace("[databaseUseSSL]", String.valueOf(credentials.isUseSSL()));
+        content = content.replace("[databaseAllowKey]", String.valueOf(credentials.isAllowPublicKeyRetrieval()));
+        return content;
+    }

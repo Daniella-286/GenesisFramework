@@ -1,11 +1,16 @@
-public ModelRedirect insert(ServletEntity entity) throws Exception{
+public Object insert([controllerMethodParameter]) throws Exception{
+    ModelView result = new ModelView();
     [classNameMaj] o=new [classNameMaj]();
     [controllerChangeInstanciation]
     try(Connection connex=DAOConnexion.getConnexion("[databaseDriver]", "[databaseSgbd]", "[databaseHost]", "[databasePort]", "[databaseName]", "[user]", "[pwd]", [databaseUseSSL], [databaseAllowKey])){
         dao.insertWithoutPrimaryKey(connex, o);
         connex.commit();
-        ModelRedirect model=new ModelRedirect("tocrud[classNameMin].do");
-        return model;
+        result.setUrlRedirect("[classNameMin].htm");
+    } catch (Exception e) {
+        return e.getMessage();
     }
+    return result;
 }
+
+
 

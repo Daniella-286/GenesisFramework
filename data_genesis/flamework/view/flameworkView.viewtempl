@@ -16,7 +16,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="[classNameMin] : ${liste}">
+                            <tr th:each="[classNameMin] : ${[classNameMin]s}">
                                 [viewTableLine]
                                 <td>
                                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" th:data-bs-target="'#modifiermodal' + ${[classNameMin].[primaryNameMaj]}">

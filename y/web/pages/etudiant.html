@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Ajoutez les liens vers les bibliothèques CSS et JS nécessaires pour votre projet -->
+</head>
+<body>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-12 col-xl-6 offset-3">
+                <div class="bg-secondary rounded h-100 p-4">
+                    <h6 class="mb-4">Liste de etudiant</h6>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Id</th><th scope="col">Nom</th><th scope="col">Prenom</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="etudiant : ${etudiants}">
+                                <td th:text="${etudiant.id}"></td><td th:text="${etudiant.nom}"></td><td th:text="${etudiant.prenom}"></td>
+                                <td>
+                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" th:data-bs-target="'#modifiermodal' + ${etudiant.Id}">
+                                        <p><i class="bi bi-pencil"></i>Modifier</p>
+                                    </button>
+                                    <div class="modal fade" th:id="'modifiermodal' + ${etudiant.Id}" tabindex="-1" th:aria-labelledby="'modifiermodalLabel' + ${etudiant.Id}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form th:action="@{'/Y/updateetudiant.do'}" method="put">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" th:text="'Modifier un ' + ${etudiant}">Modifier un etudiant</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" th:name="id" th:value="${etudiant.Id}">
+                                                        <div class="mb-3"> 
+    <label for="nominput" class="form-label">Nom
+    </label> 
+    <input type="text" class="form-control" id="nominput" aria-describedby="nomhelp" name="nom" th:value="${ etudiant.nom }"> 
+</div>
+<div class="mb-3"> 
+    <label for="prenominput" class="form-label">Prenom
+    </label> 
+    <input type="text" class="form-control" id="prenominput" aria-describedby="prenomhelp" name="prenom" th:value="${ etudiant.prenom }"> 
+</div>
+
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary">Valider</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <form th:action="@{'/Y/deleteetudiant.do'}" method="delete">
+                                        <input type="hidden" th:name="id" th:value="${etudiant.getId}">
+                                        <button type="submit" class="btn btn-danger">
+                                            <p><i class="bi bi-trash"></i>Supprimer</p>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutmodal">
+                        <p><i class="bi bi-plus"></i>Ajouter</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Ajout -->
+            <div class="modal fade" id="ajoutmodal" tabindex="-1" aria-labelledby="ajoutmodalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form th:action="@{'/Y/insertetudiant.do'}" method="post">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" th:text="'Ajouter un ' + ${etudiant}">Ajouter un etudiant</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3"> 
+    <label for="nominput" class="form-label">Nom
+    </label> 
+    <input type="text" class="form-control" id="nominput" aria-describedby="nomhelp" name="nom"> 
+</div>
+<div class="mb-3"> 
+    <label for="prenominput" class="form-label">Prenom
+    </label> 
+    <input type="text" class="form-control" id="prenominput" aria-describedby="prenomhelp" name="prenom"> 
+</div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Valider</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

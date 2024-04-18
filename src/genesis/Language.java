@@ -226,6 +226,7 @@ public class Language {
                 fields = fields.replace("[foreignNameMin]", HandyManUtils.minStart(ef.getType()));
             }
         }
+
         content = content.replace("[fields]", fields);
         String constructors = "";
         String constructorParameter, foreignInstanciation;
@@ -248,14 +249,20 @@ public class Language {
             constructors = constructors.replace("[controllerForeignContextInstanciation]", foreignInstanciation);
         }
         content = content.replace("[constructors]", constructors);
-        String methods = "", methodAnnotes, methodParameters;
+        String methods = "", methodAnnotes, methodParameters ;
         String changeInstanciation, whereInstanciation, foreignList, foreignInclude;
+        
         for (ControllerMethod m : getController().getControllerMethods()) {
             methodAnnotes = "";
             for (String ma : m.getControllerMethodAnnotations()) {
                 methodAnnotes += ma + "\n";
+                for (EntityField efi : entity.getFields()) {
+                    methodAnnotes = methodAnnotes.replace("[fieldType]", efi.getType());
+                    methodAnnotes = methodAnnotes.replace("[fieldNameMin]", HandyManUtils.minStart(efi.getName()));
+                }
             }
             methods += methodAnnotes;
+
             methodParameters = "";
             for (EntityField ef : entity.getFields()) {
                 methodParameters += m.getControllerMethodParameter();
@@ -271,6 +278,7 @@ public class Language {
             methods += HandyManUtils.getFileContent(Constantes.DATA_PATH + "/" + m.getControllerMethodContent() + "."
                     + Constantes.CONTROLLER_TEMPLATE_EXT);
             methods = methods.replace("[controllerMethodParameter]", methodParameters);
+
             changeInstanciation = "";
             foreignList = "";
             foreignInclude = "";

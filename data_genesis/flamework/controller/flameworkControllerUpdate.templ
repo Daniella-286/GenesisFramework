@@ -1,4 +1,5 @@
-public ModelRedirect update(ServletEntity entity) throws Exception{
+public Object update([controllerMethodParameter]) throws Exception{
+    ModelView result = new ModelView();
     [classNameMaj] o=new [classNameMaj]();
     [controllerChangeInstanciation]
     [classNameMaj] where=new [classNameMaj]();
@@ -6,7 +7,9 @@ public ModelRedirect update(ServletEntity entity) throws Exception{
     try(Connection connex=DAOConnexion.getConnexion("[databaseDriver]", "[databaseSgbd]", "[databaseHost]", "[databasePort]", "[databaseName]", "[user]", "[pwd]", [databaseUseSSL], [databaseAllowKey])){
         dao.update(connex, o, where);
         connex.commit();
-        ModelRedirect model=new ModelRedirect("tocrud[classNameMin].do");
-        return model;
+        result.setUrlRedirect("[classNameMin].htm");
+        } catch (Exception e) {
+        return e.getMessage();
     }
+    return result;
 }

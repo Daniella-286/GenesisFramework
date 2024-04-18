@@ -51,9 +51,9 @@
             "modelFieldCase":"Min",
             "modelFieldContent":"private [fieldType] [fieldName[modelFieldCase]];",
             "modelGetter":"public [fieldType] get[fieldNameMaj](){ return [fieldName[modelFieldCase]]; }",
-            "modelSetter":"public void set[fieldNameMaj]([fieldType] o){ [fieldName[modelFieldCase]]=o; }",
+            "modelSetter":"public void set[fieldNameMaj]([fieldType] o){ [fieldName[modelFieldCase]]=o; } public void set[fieldNameMaj]String (String o) { [fieldName[modelFieldCase]] = [fieldType].valueOf(o) ;   } ",
             "modelConstructors":[
-                "public [classNameMaj](){}",
+                "public [classNameMaj](){} ; ",
                 "public [classNameMaj]([primaryFieldType] o){ [primaryFieldName[modelFieldCase]]=o; }"
             ],
             "modelSavePath":"[projectNameMaj]/src/[projectNameMin]/entities",
@@ -64,12 +64,6 @@
         },
         "controller":{
             "controllerImports":[
-                "import eriq.flamework.annotations.Controller;",
-                "import eriq.flamework.annotations.Singleton;",
-                "import eriq.flamework.annotations.URLMapping;",
-                "import eriq.flamework.model.ModelRedirect;",
-                "import eriq.flamework.model.ModelView;",
-                "import eriq.flamework.servlet.ServletEntity;",
                 "import veda.godao.DAO;",
                 "import veda.godao.utils.DAOConnexion;",
                 "import java.sql.Connection;",
@@ -79,11 +73,12 @@
                 "import bdd.BddObject;",
                 "import model.database.Constante;",
                 "import model.lieu.CategorieLieu;",
-                "import url.ModelView;"
+                "import url.ModelView;",
+                "import annotation.Url;"
             ],
             "controllerAnnotations":[
-                "@Controller",
-                "@Singleton"
+                "",
+                ""
             ],
             "controllerExtends":"",
             "controllerName":"[classNameMaj]Controller",
@@ -94,15 +89,15 @@
                 }
             ],
             "controllerChangeInstanciation":{
-                "template":"o.set[fieldNameMaj]([content]);",
+                "template":"o.set[fieldNameMaj]([fieldNameMin]);",
                 "value":"entity.getData().get(\"[fieldNameMin]\")"
             },
             "controllerWhereInstanciation":{
-                "template":"where.set[primaryNameMaj]([content]);",
+                "template":"where.set[primaryNameMaj]([primaryNameMin]);",
                 "value":"entity.getData().get(\"[primaryNameMin]\")"
             },
             "controllerForeignInstanciation":{
-                "template":"o.set[fieldNameMaj](new [projectNameMin].entities.[foreignType]([content]));",
+                "template":"o.set[fieldNameMaj]([fieldNameMin]);",
                 "value":"entity.getData().get(\"[fieldNameMin]\")"
             },
             "controllerForeignList":"[projectNameMin].entities.[foreignType][] [foreignNameMin]=dao.select(connex, [projectNameMin].entities.[foreignType].class);\nmodel.addItem(\"[foreignNameMin]s\", [foreignNameMin]);",
@@ -113,31 +108,30 @@
             "controllerMethods":[
                 {
                     "controllerMethodAnnotations":[
-                        "@URLMapping(\"insert[classNameMin].do\")"
+                        "@Url(link = \"traitement[classNameMaj].htm\")",
+                        "@Parameters(args = { \"[fieldNameMin]\" })"
                     ],
-                    "controllerMethodParameter":"",
+                    "controllerMethodParameter":"String  [fieldNameMin] ",
                     "controllerMethodContent":"flamework/controller/flameworkControllerInsert"
                 },
-
                 {
                     "controllerMethodAnnotations":[
-                        "@URLMapping(\"tocrud[classNameMin].htm\")",
-                        "@Parameters(\"tocrud[classNameMin].do\")"
+                        "@Url(link = \"liste[classNameMin].htm\")" 
                     ],
                     "controllerMethodParameter":"",
                     "controllerMethodContent":"flamework/controller/flameworkControllerRead"
                 },
-                
                 {
                     "controllerMethodAnnotations":[
-                        "@URLMapping(\"update[classNameMin].do\")"
+                        "@Url(link = \"update[classNameMin].htm\")"
                     ],
-                    "controllerMethodParameter":"",
+                    "controllerMethodParameter":"String  [fieldNameMin] ",
                     "controllerMethodContent":"flamework/controller/flameworkControllerUpdate"
                 },
                 {
                     "controllerMethodAnnotations":[
-                        "@URLMapping(\"delete[classNameMin].do\")"
+                        "@Url(link = \"delete[classNameMin].htm\")",
+                        "@Parameters(args = { \"[primaryNameMin]\" })"
                     ],
                     "controllerMethodParameter":"",
                     "controllerMethodContent":"flamework/controller/flameworkControllerDelete"
